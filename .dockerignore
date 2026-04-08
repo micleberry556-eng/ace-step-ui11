@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+server/dist/
+build/
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Database files
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+
+# Generated audio files
+server/public/audio/*.mp3
+server/public/audio/*.flac
+server/public/audio/*.wav
+server/public/audio/*/
+server/public/audio/reference-tracks/*
+
+# User uploads
+server/public/uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation and assets not needed in build
+docs/
+*.md
+*.gif
+
+# External tools
+ComfyUI/
+comfyui/
+ACE-Step-1.5/
+wavacity-editor/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+
+# Docker files (avoid recursive builds)
+docker-compose.yml
+Dockerfile
+server/Dockerfile
+
+# Misc
+*.tmp
+tmp/
+temp/
+coverage/
+.cache/

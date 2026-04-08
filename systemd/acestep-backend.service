@@ -1,0 +1,37 @@
+# ACE-Step UI Backend (Express + SQLite)
+#
+# Install:
+#   sudo cp acestep-backend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now acestep-backend
+#
+# Edit paths below to match your installation.
+
+[Unit]
+Description=ACE-Step UI Backend Server
+After=network.target acestep-api.service
+Wants=acestep-api.service
+
+[Service]
+Type=simple
+User=acestep
+Group=acestep
+
+# Change this to your ace-step-ui/server directory
+WorkingDirectory=/opt/ace-step/ace-step-ui/server
+
+# Point to your .env file
+EnvironmentFile=/opt/ace-step/ace-step-ui/.env
+Environment=NODE_ENV=production
+
+ExecStart=/usr/bin/npx tsx src/index.ts
+
+Restart=on-failure
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=acestep-backend
+
+[Install]
+WantedBy=multi-user.target
