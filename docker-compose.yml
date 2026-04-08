@@ -1,44 +1,15 @@
-# ACE-Step UI — Full Stack (AI Model + Backend + Frontend)
-#
-# Requirements:
-#   - NVIDIA GPU with 4GB+ VRAM
-#   - nvidia-container-toolkit installed on the host
-#     (see https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+# ACE-Step UI — Docker Deployment
 #
 # Usage:
 #   docker compose up --build
 #
-# First run downloads ~5GB of AI models. Check progress:
-#   docker compose logs -f model
-#
 # Access the app at http://localhost
+#
+# The UI (frontend + backend) starts immediately.
+# AI music generation requires the ACE-Step model running separately
+# on a machine with an NVIDIA GPU (see README for instructions).
 
 services:
-  # ── AI Model (ACE-Step 1.5 with CUDA) ───────────────────────────────────
-  model:
-    build:
-      context: ./model
-      dockerfile: Dockerfile
-    ports:
-      - "${API_PORT:-8001}:8001"
-    volumes:
-      # Persist downloaded models (~5GB) across container restarts
-      - model-cache:/app/checkpoints
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8001/gradio_api/info"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 300s
-    restart: unless-stopped
-
   # ── Backend (Express + SQLite) ──────────────────────────────────────────
   backend:
     build:
@@ -52,14 +23,14 @@ services:
       FRONTEND_URL: "http://localhost:${FRONTEND_PORT:-80}"
       JWT_SECRET: "${JWT_SECRET:-ace-step-ui-local-secret}"
       PEXELS_API_KEY: "${PEXELS_API_KEY:-}"
-      # Connect to the model container by service name
-      ACESTEP_API_URL: "http://model:8001"
+      # AI model API URL. Change this if the model runs on another machine.
+      # Default: host machine on port 8001
+      ACESTEP_API_URL: "${ACESTEP_API_URL:-http://host.docker.internal:8001}"
     volumes:
       - db-data:/app/data
       - audio-data:/app/public/audio
-    depends_on:
-      model:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
       interval: 10s
@@ -81,8 +52,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  model-cache:
-    driver: local
   db-data:
     driver: local
   audio-data:
