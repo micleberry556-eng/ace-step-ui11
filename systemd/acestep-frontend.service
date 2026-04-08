@@ -1,0 +1,45 @@
+# ACE-Step UI Frontend (Vite preview / production build)
+#
+# Install:
+#   sudo cp acestep-frontend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now acestep-frontend
+#
+# Edit paths below to match your installation.
+#
+# For high-traffic production use, consider serving the built files
+# with nginx instead (see nginx.conf in the repo).
+
+[Unit]
+Description=ACE-Step UI Frontend
+After=network.target acestep-backend.service
+Wants=acestep-backend.service
+
+[Service]
+Type=simple
+User=acestep
+Group=acestep
+
+# Change this to your ace-step-ui directory
+WorkingDirectory=/opt/ace-step/ace-step-ui
+
+# Point to your .env file
+EnvironmentFile=/opt/ace-step/ace-step-ui/.env
+Environment=NODE_ENV=production
+
+# Build first, then serve the production build
+ExecStartPre=/usr/bin/npm run build
+ExecStart=/usr/bin/npx vite preview --host 0.0.0.0 --port 80
+
+Restart=on-failure
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=acestep-frontend
+
+# Allow binding to port 80 without root
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

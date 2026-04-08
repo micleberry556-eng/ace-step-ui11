@@ -1,0 +1,44 @@
+# ACE-Step 1.5 AI Music Generation API (Gradio)
+#
+# Install:
+#   sudo cp acestep-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now acestep-api
+#
+# Edit paths below to match your installation.
+
+[Unit]
+Description=ACE-Step 1.5 AI Music Generation API
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=acestep
+Group=acestep
+
+# Change this to your ACE-Step 1.5 directory
+WorkingDirectory=/opt/ace-step/ACE-Step-1.5
+
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/home/acestep/.local/bin
+
+# Port 8001 is the default; --backend pt uses ~1.6GB VRAM (works on 4GB GPUs)
+# For more VRAM (better quality): change --backend pt to --backend vllm
+ExecStart=/usr/local/bin/uv run acestep --port 8001 --enable-api --backend pt --server-name 127.0.0.1
+
+Restart=on-failure
+RestartSec=10
+
+# First run downloads ~5GB of models; allow plenty of time
+TimeoutStartSec=600
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=acestep-api
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=90%
+
+[Install]
+WantedBy=multi-user.target
