@@ -1,0 +1,54 @@
+# ACE-Step UI - Local Deployment
+#
+# Usage:
+#   docker compose up --build
+#
+# The ACE-Step AI model API (default: http://localhost:8001) must be running
+# separately on the host, since it typically requires GPU access.
+#
+# Access the app at http://localhost:80
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DATABASE_PATH: /app/data/acestep.db
+      AUDIO_DIR: /app/public/audio
+      FRONTEND_URL: "http://localhost:${FRONTEND_PORT:-80}"
+      JWT_SECRET: "${JWT_SECRET:-ace-step-ui-local-secret}"
+      PEXELS_API_KEY: "${PEXELS_API_KEY:-}"
+      # Point to the ACE-Step model API running on the host machine.
+      # On Docker Desktop (Mac/Windows) use host.docker.internal.
+      # On Linux, use the host gateway or the host's LAN IP.
+      ACESTEP_API_URL: "${ACESTEP_API_URL:-http://host.docker.internal:8001}"
+    volumes:
+      - db-data:/app/data
+      - audio-data:/app/public/audio
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    driver: local
+  audio-data:
+    driver: local

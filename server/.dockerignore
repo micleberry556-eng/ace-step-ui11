@@ -1,0 +1,39 @@
+# Dependencies (will be installed fresh in Docker)
+node_modules/
+
+# Build outputs
+dist/
+
+# Environment files
+.env
+.env.local
+
+# Database files
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Generated audio (will use Docker volumes)
+public/audio/*.mp3
+public/audio/*.flac
+public/audio/*.wav
+public/audio/*/
+public/audio/reference-tracks/*
+!public/audio/.gitkeep
+!public/audio/reference-tracks/.gitkeep
+
+# User uploads
+public/uploads/
+
+# Logs
+*.log
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Scripts not needed in production
+scripts/
+
+# Misc
+*.tmp
